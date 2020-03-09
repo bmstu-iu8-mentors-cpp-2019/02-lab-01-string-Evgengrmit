@@ -1,10 +1,13 @@
-// Copyright 2018 Your Name <your_email>
+// Copyright 2020 Evgenij Grigorev evgengrmit@icloud.com
 
 #ifndef INCLUDE_STRING_HPP_
 #define INCLUDE_STRING_HPP_
 
+#include <algorithm>
 #include <cstddef>
+#include <cstring>
 #include <iostream>
+#include <utility>
 
 class String {
  public:
@@ -21,7 +24,7 @@ class String {
   /// Пользовательский конструктор
   /// <param name="data">Данные, которые требуется поместить в создаваемый
   /// объект </param>
-  String(const char* data);
+  explicit String(const char* data);
 
   /// Оператор присваивания
   /// <param name="data">Объект, который копируем </param>
@@ -56,7 +59,7 @@ class String {
   /// Функция замены символов, заменяет все символы oldSymbol на newSymbol.
   /// <param name="oldSymbol">Символ, который требуется заменить </param>
   /// <param name="newSymbol">Символ, на который требуется заменить </param>
-  void Replace(char oldSymbol, char newSymbol);
+  void Replace(const char& oldSymbol, const char& newSymbol);
 
   /// Функция возвращает длину строки
   /// <returns>Возвращаем длину строки</returns>
@@ -74,7 +77,7 @@ class String {
   /// </example>
   /// <param name="index"> Индекс символа </param>
   /// <returns> Значение символа в строке с индексом index</returns>
-  char operator[](size_t index) const;
+  char operator[](const size_t& index) const;
 
   /// Оператор []
   /// <example>
@@ -85,7 +88,7 @@ class String {
   /// </example>
   /// <param name="index"> Индекс символа </param>
   /// <returns> Ссылка на символ в строке с индексом index</returns>
-  char& operator[](size_t index);
+  char& operator[](const size_t& index);
 
   /// Смотри пример
   /// <example>
@@ -95,7 +98,7 @@ class String {
   /// </code>
   /// </example>
   /// <param name="symbol"> Значение символов, которе отрезаем </param>
-  void RTrim(char symbol);
+  void RTrim(const char& symbol);
 
   /// Смотри пример
   /// <example>
@@ -105,7 +108,7 @@ class String {
   /// </code>
   /// </example>
   /// <param name="symbol"> Значение символов, которе отрезаем </param>
-  void LTrim(char symbol);
+  void LTrim(const char& symbol);
 
   void swap(String& oth);
 
