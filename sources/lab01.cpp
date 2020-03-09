@@ -9,7 +9,7 @@ int main() {
   String s2;
   s2 = s1;
   s2[0] = 's';
-  s1 = String("some");
+  { s1 = String("some"); }
   s1 += String(" ");
   s1 += String("string");
   s1.Replace('s', 'S');
@@ -22,7 +22,17 @@ int main() {
   s1 *= 2;
   s1 += s2 * 3;
   std::cout << s1.Find(String("str"));
-  String s2;
-  std::cout << String{}.Empty();
+
+  std::cout << String().Empty();
+  String s("  abc   ____");
+
+  s.RTrim('_');
+  std::cout << s << std::endl;
+
+  s.LTrim(' ');
+  std::cout << s << std::endl;
+
+  s.RTrim(' ');
+  std::cout << s << std::endl;
   return 0;
 }

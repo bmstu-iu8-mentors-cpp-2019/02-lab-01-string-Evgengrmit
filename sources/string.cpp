@@ -5,17 +5,18 @@
 String::~String() { delete Data; }
 /// Конструктор по умолчанию
 String::String() {
-  Data = new char[0];
+  Data = new char[1];
+  Data[0] = '\0';
 }
 /// Конструктор копирования
 String::String(const String& rhs) {
-  Data = new char[std::strlen(rhs.Data) + 1];
-  std::strcpy(Data, rhs.Data);
+  Data = new char[std::strlen(rhs.Data)];
+  std::snprintf(Data, std::strlen(rhs.Data) + 1, "%s", rhs.Data);
 }
 /// Пользовательский конструктор
 String::String(const char* data) {
-  Data = new char[std::strlen(data) + 1];
-  std::strcpy(Data, data);
+  Data = new char[std::strlen(data)];
+  std::snprintf(Data, std::strlen(data) + 1, "%s", data);
 }
 /// Оператор присваивания
 String& String::operator=(const String& rhs) {
@@ -26,37 +27,27 @@ String& String::operator=(const String& rhs) {
     } else {
       delete[] Data;
     }
-    Data = new char[std::strlen(rhs.Data) + 1];
-    std::strcpy(Data, rhs.Data);
+    Data = new char[std::strlen(rhs.Data)];
+    std::snprintf(Data, std::strlen(rhs.Data) + 1, "%s", rhs.Data);
   }
   return *this;
 }
 /// Оператор +=
 String& String::operator+=(const String& rhs) {
-  char* temporaryArray = new char[std::strlen(Data) + 1];
-  std::strcpy(temporaryArray, Data);
-  if (!Data) {  // Если указатель непустой очищаем массив
-  } else {
-    delete[] Data;
-  }
-  if (this == &rhs) {  // Обработка самоприсваивания
-    Data = new char[std::strlen(temporaryArray) * 2 + 1];
-    std::strcpy(Data, temporaryArray);
-    std::strcpy(Data + std::strlen(temporaryArray), temporaryArray);
-  } else {
-    Data = new char[std::strlen(temporaryArray) + std::strlen(rhs.Data) + 1];
-    std::strcpy(Data, temporaryArray);
-    std::strcpy(Data + std::strlen(temporaryArray), rhs.Data);
-  }
-  delete[] temporaryArray;
+  char* temporaryArray = new char[std::strlen(Data) + std::strlen(rhs.Data)];
+  std::copy(Data, Data + std::strlen(Data), temporaryArray);
+  std::snprintf(temporaryArray, std::strlen(Data) + 1, "%s", Data);
+  std::snprintf(temporaryArray + std::strlen(Data), std::strlen(rhs.Data) + 1,
+                "%s", rhs.Data);
+  delete[] Data;
+  Data = temporaryArray;
   return *this;
 }
 /// Оператор *=
 String& String::operator*=(unsigned int m) {
-  char* temporaryArray = new char[std::strlen(Data) * (m + 1) + 1];
-  size_t step = 0;
-  for (size_t i = 0; i < (m + 1); ++i, step += std::strlen(Data)) {
-    std::strcpy(temporaryArray + step, Data);
+  char* temporaryArray = new char[std::strlen(Data) * (m + 1)];
+  for (size_t i = 0, step = 0; i < (m + 1); ++i, step += std::strlen(Data)) {
+    std::snprintf(temporaryArray + step, std::strlen(Data) + 1, "%s", Data);
   }
   delete[] Data;
   Data = temporaryArray;
@@ -118,14 +109,9 @@ void String::Replace(const char& oldSymbol, const char& newSymbol) {
   }
 }
 /// Функция возвращает длину строки
-size_t String::Size() const {
-  return std::strlen(Data);
-}
+size_t String::Size() const { return std::strlen(Data); }
 /// Функция для определения пуста ли строка
-bool String::Empty() const {
- //std::cout<< std::strlen(Data) << std::endl;
-  return std::strlen(Data) == 0;
-}
+bool String::Empty() const { return std::strlen(Data) == 0; }
 /// Оператор [] без доступа
 char String::operator[](const size_t& index) const {
   if (index > std::strlen(Data) - 1) {
@@ -143,7 +129,7 @@ char& String::operator[](const size_t& index) {
 /// Отрезание символов справа
 void String::RTrim(const char& symbol) {
   size_t countOfTrim = 0;
-  for (size_t i = std::strlen(Data) - 1; i ; --i) {
+  for (size_t i = std::strlen(Data) - 1; i; --i) {
     if (Data[i] == symbol) {
       ++countOfTrim;
     } else {
@@ -152,9 +138,8 @@ void String::RTrim(const char& symbol) {
   }
 
   char* temporaryArray = new char[std::strlen(Data) - countOfTrim];
-  std::reverse(Data, Data + std::strlen(Data));
-  strcpy(temporaryArray, Data + countOfTrim);
-  std::reverse(temporaryArray, temporaryArray + std::strlen(temporaryArray));
+  std::snprintf(temporaryArray, std::strlen(Data) + 1 - countOfTrim, "%s",
+                Data);
   delete[] Data;
   Data = temporaryArray;
 }
@@ -169,7 +154,8 @@ void String::LTrim(const char& symbol) {
     }
   }
   char* temporaryArray = new char[(std::strlen(Data) - countOfTrim) + 1];
-  std::strcpy(temporaryArray, Data + countOfTrim);
+  std::snprintf(temporaryArray, std::strlen(Data) + 1 - countOfTrim, "%s",
+                Data + countOfTrim);
   delete[] Data;
   Data = temporaryArray;
 }
