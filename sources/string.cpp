@@ -34,14 +34,12 @@ String& String::operator=(const String& rhs) {
 }
 /// Оператор +=
 String& String::operator+=(const String& rhs) {
-  char* temporaryArray =
-      new char[std::strlen(Data) + std::strlen(rhs.Data) + 1];
-  std::copy(Data, Data + std::strlen(Data), temporaryArray);
-  std::snprintf(temporaryArray, std::strlen(Data) + 1, "%s", Data);
-  std::snprintf(temporaryArray + std::strlen(Data), std::strlen(rhs.Data) + 1,
+  char* kArray = new char[std::strlen(Data) + std::strlen(rhs.Data) + 1];
+  std::snprintf(kArray, std::strlen(Data) + 1, "%s", Data);
+  std::snprintf(kArray + std::strlen(Data), std::strlen(rhs.Data) + 1,
                 "%s", rhs.Data);
   delete[] Data;
-  Data = temporaryArray;
+  Data = kArray;
   return *this;
 }
 /// Оператор *=
