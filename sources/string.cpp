@@ -2,7 +2,7 @@
 
 #include "string.hpp"
 /// Деструктор
-String::~String() { delete Data; }
+String::~String() { delete[] Data; }
 /// Конструктор по умолчанию
 String::String() {
   Data = new char[1];
