@@ -11,12 +11,12 @@ String::String() {
 /// Конструктор копирования
 String::String(const String& rhs) {
   Data = new char[std::strlen(rhs.Data) + 1];
-  std::snprintf(Data, std::strlen(rhs.Data) + 1, "%s", rhs.Data);
+  std::copy(rhs.Data, rhs.Data + std::strlen(rhs.Data) + 1, Data);
 }
 /// Пользовательский конструктор
 String::String(const char* data) {
   Data = new char[std::strlen(data) + 1];
-  std::snprintf(Data, std::strlen(data) + 1, "%s", data);
+  std::copy(data, data + std::strlen(data) + 1, Data);
 }
 /// Оператор присваивания
 String& String::operator=(const String& rhs) {
@@ -28,28 +28,30 @@ String& String::operator=(const String& rhs) {
       delete[] Data;
     }
     Data = new char[std::strlen(rhs.Data) + 1];
-    std::snprintf(Data, std::strlen(rhs.Data) + 1, "%s", rhs.Data);
+    std::copy(rhs.Data, rhs.Data + std::strlen(rhs.Data) + 1, Data);
   }
   return *this;
 }
 /// Оператор +=
 String& String::operator+=(const String& rhs) {
-  char* kArray = new char[std::strlen(Data) + std::strlen(rhs.Data) + 1];
-  std::snprintf(kArray, std::strlen(Data) + 1, "%s", Data);
-  std::snprintf(kArray + std::strlen(Data), std::strlen(rhs.Data) + 1,
-                "%s", rhs.Data);
+  char* tempArray = new char[std::strlen(Data) + std::strlen(rhs.Data) + 1];
+  std::copy(Data, Data + std::strlen(Data) + 1, tempArray);
+  std::copy(rhs.Data, rhs.Data + std::strlen(rhs.Data) + 1,
+            tempArray + std::strlen(tempArray));
+  // tempArray[std::strlen(Data) + std::strlen(rhs.Data)] = '\0';
   delete[] Data;
-  Data = kArray;
+  Data = tempArray;
   return *this;
 }
 /// Оператор *=
 String& String::operator*=(unsigned int m) {
-  char* temporaryArray = new char[std::strlen(Data) * (m + 1) + 1];
+  char* tempArray = new char[std::strlen(Data) * (m + 1) + 1];
   for (size_t i = 0, step = 0; i < (m + 1); ++i, step += std::strlen(Data)) {
-    std::snprintf(temporaryArray + step, std::strlen(Data) + 1, "%s", Data);
+    std::copy(Data, Data + std::strlen(Data), tempArray + step);
   }
+  tempArray[std::strlen(Data) * (m + 1)] = '\0';
   delete[] Data;
-  Data = temporaryArray;
+  Data = tempArray;
   return *this;
 }
 /// Оператор ==
@@ -136,11 +138,11 @@ void String::RTrim(const char& symbol) {
     }
   }
 
-  char* temporaryArray = new char[std::strlen(Data) - countOfTrim + 1];
-  std::snprintf(temporaryArray, std::strlen(Data) + 1 - countOfTrim, "%s",
-                Data);
+  char* tempArray = new char[std::strlen(Data) - countOfTrim + 1];
+  std::copy(Data, Data + std::strlen(Data) - countOfTrim, tempArray);
+  tempArray[std::strlen(Data) - countOfTrim] = '\0';
   delete[] Data;
-  Data = temporaryArray;
+  Data = tempArray;
 }
 /// Отрезание символов слева
 void String::LTrim(const char& symbol) {
@@ -152,16 +154,17 @@ void String::LTrim(const char& symbol) {
       break;
     }
   }
-  char* temporaryArray = new char[(std::strlen(Data) - countOfTrim) + 1];
-  std::snprintf(temporaryArray, std::strlen(Data) + 1 - countOfTrim, "%s",
-                Data + countOfTrim);
+  char* tempArray = new char[(std::strlen(Data) - countOfTrim) + 1];
+  std::copy(Data + countOfTrim, Data + std::strlen(Data) + 1, tempArray);
   delete[] Data;
-  Data = temporaryArray;
+  Data = tempArray;
 }
+
 void String::swap(String& oth) {
-  char* temp = Data;
-  Data = oth.Data;
-  oth.Data = temp;
+  std::swap(Data, oth.Data);
+  //  char* temp = Data;
+  //  Data = oth.Data;
+  //  oth.Data = temp;
 }
 /// Оператор +
 String operator+(const String& a, const String& b) {
@@ -172,9 +175,7 @@ String operator+(const String& a, const String& b) {
 /// Оператор *
 String operator*(const String& a, unsigned int b) {
   String multiplyingByTheNumber(a);
-  for (size_t i = 0; i < b - 1; ++i) {
-    multiplyingByTheNumber += a;
-  }
+  multiplyingByTheNumber *= (b - 1);
   return multiplyingByTheNumber;
 }
 /// Оператор !=
