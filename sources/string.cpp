@@ -46,11 +46,11 @@ String& String::operator+=(const String& rhs) {
 }
 /// Оператор *=
 String& String::operator*=(unsigned int m) {
-  char* tempArray = new char[std::strlen(Data) * m + 1];
+  char* tempArray = new char[SizeOfString * m + 1];
   for (size_t i = 0, step = 0; i < m; ++i, step += std::strlen(Data)) {
     std::copy(Data, Data + std::strlen(Data), tempArray + step);
   }
-  tempArray[std::strlen(Data) * (m + 1)] = '\0';
+  tempArray[std::strlen(Data) * m] = '\0';
   delete[] Data;
   Data = tempArray;
   SizeOfString = std::strlen(tempArray);
@@ -102,14 +102,14 @@ size_t String::Size() const { return std::strlen(Data); }
 bool String::Empty() const { return std::strlen(Data) == 0; }
 /// Оператор [] без доступа
 char String::operator[](const size_t& index) const {
-  if (index > std::strlen(Data) - 1) {
+  if (index > SizeOfString - 1) {
     throw std::out_of_range("index >= length of string");
   }
   return Data[index];
 }
 /// Оператор [] с доступом
 char& String::operator[](const size_t& index) {
-  if (index > std::strlen(Data) - 1) {
+  if (index > SizeOfString - 1) {
     throw std::out_of_range("index >= length of string");
   }
   return Data[index];
