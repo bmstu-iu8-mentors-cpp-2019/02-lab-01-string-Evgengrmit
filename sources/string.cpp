@@ -7,16 +7,16 @@ String::~String() { delete[] Data; }
 String::String() {
   Data = new char[1];
   Data[0] = '\0';
+  SizeOfString = 0;
 }
 /// Конструктор копирования
-String::String(const String& rhs) {
-  Data = new char[std::strlen(rhs.Data) + 1];
-  std::copy(rhs.Data, rhs.Data + std::strlen(rhs.Data) + 1, Data);
-}
+String::String(const String& rhs)
+    : String(rhs.Data) {}  // Делегирование конструкторов
 /// Пользовательский конструктор
 String::String(const char* data) {
-  Data = new char[std::strlen(data) + 1];
-  std::copy(data, data + std::strlen(data) + 1, Data);
+  SizeOfString = std::strlen(data);
+  Data = new char[SizeOfString + 1];
+  std::copy(data, data + SizeOfString + 1, Data);
 }
 /// Оператор присваивания
 String& String::operator=(const String& rhs) {
@@ -27,65 +27,52 @@ String& String::operator=(const String& rhs) {
     } else {
       delete[] Data;
     }
-    Data = new char[std::strlen(rhs.Data) + 1];
-    std::copy(rhs.Data, rhs.Data + std::strlen(rhs.Data) + 1, Data);
+    SizeOfString = rhs.SizeOfString;
+    Data = new char[rhs.SizeOfString + 1];
+    std::copy(rhs.Data, rhs.Data + rhs.SizeOfString + 1, Data);
   }
   return *this;
 }
 /// Оператор +=
 String& String::operator+=(const String& rhs) {
-  char* tempArray = new char[std::strlen(Data) + std::strlen(rhs.Data) + 1];
-  std::copy(Data, Data + std::strlen(Data) + 1, tempArray);
-  std::copy(rhs.Data, rhs.Data + std::strlen(rhs.Data) + 1,
+  char* tempArray = new char[SizeOfString + rhs.SizeOfString + 1];
+  std::copy(Data, Data + SizeOfString + 1, tempArray);
+  std::copy(rhs.Data, rhs.Data + rhs.SizeOfString + 1,
             tempArray + std::strlen(tempArray));
-  // tempArray[std::strlen(Data) + std::strlen(rhs.Data)] = '\0';
   delete[] Data;
   Data = tempArray;
+  SizeOfString = std::strlen(tempArray);
   return *this;
 }
 /// Оператор *=
 String& String::operator*=(unsigned int m) {
-  char* tempArray = new char[std::strlen(Data) * (m + 1) + 1];
-  for (size_t i = 0, step = 0; i < (m + 1); ++i, step += std::strlen(Data)) {
+  char* tempArray = new char[std::strlen(Data) * m + 1];
+  for (size_t i = 0, step = 0; i < m; ++i, step += std::strlen(Data)) {
     std::copy(Data, Data + std::strlen(Data), tempArray + step);
   }
   tempArray[std::strlen(Data) * (m + 1)] = '\0';
   delete[] Data;
   Data = tempArray;
+  SizeOfString = std::strlen(tempArray);
   return *this;
 }
 /// Оператор ==
 bool String::operator==(const String& rhs) const {
-  for (size_t i = 0; i < std::max(std::strlen(Data), std::strlen(rhs.Data));
-       ++i) {
-    if (Data[i] - rhs.Data[i]) {
-      return false;
-    }
-  }
-  return true;
+  return !std::strcmp(Data, rhs.Data);
 }
 /// Оператор &lt;
 bool String::operator<(const String& rhs) const {
-  for (size_t i = 0; i < std::max(std::strlen(Data), std::strlen(rhs.Data));
-       ++i) {
-    if (Data[i] - rhs.Data[i] < 0) {
-      return true;
-    } else if (Data[i] - rhs.Data[i] > 0) {
-      return false;
-    }
-  }
-  return false;
+  return std::strcmp(Data, rhs.Data) < 0;
 }
 ///Функция поиска подстроки
 size_t String::Find(const String& substr) const {
   bool flag = false;  // Подстрока не найдена
   int index = 0;
-  for (size_t i = 0; i < std::strlen(Data); ++i) {
+  for (size_t i = 0; i < SizeOfString; ++i) {
     if (Data[i] == substr.Data[0]) {
       flag = true;
       index = i;
-      for (size_t j = 1;
-           j < std::strlen(substr.Data) && i + j < std::strlen(Data); ++j) {
+      for (size_t j = 1; j < substr.SizeOfString && i + j < SizeOfString; ++j) {
         if (Data[i + j] == substr.Data[j]) {
           flag = true;
         } else {
@@ -103,7 +90,7 @@ size_t String::Find(const String& substr) const {
 }
 /// Функция замены символов, заменяет все символы oldSymbol на newSymbol.
 void String::Replace(const char& oldSymbol, const char& newSymbol) {
-  for (size_t i = 0; i < std::strlen(Data); ++i) {
+  for (size_t i = 0; i < SizeOfString; ++i) {
     if (Data[i] == oldSymbol) {
       Data[i] = newSymbol;
     }
@@ -116,21 +103,21 @@ bool String::Empty() const { return std::strlen(Data) == 0; }
 /// Оператор [] без доступа
 char String::operator[](const size_t& index) const {
   if (index > std::strlen(Data) - 1) {
-    exit(1);
+    throw std::out_of_range("index >= length of string");
   }
   return Data[index];
 }
 /// Оператор [] с доступом
 char& String::operator[](const size_t& index) {
   if (index > std::strlen(Data) - 1) {
-    exit(1);
+    throw std::out_of_range("index >= length of string");
   }
   return Data[index];
 }
 /// Отрезание символов справа
 void String::RTrim(const char& symbol) {
   size_t countOfTrim = 0;
-  for (size_t i = std::strlen(Data) - 1; i; --i) {
+  for (int i = static_cast<int>(SizeOfString) - 1; i >= 0; --i) {
     if (Data[i] == symbol) {
       ++countOfTrim;
     } else {
@@ -138,16 +125,17 @@ void String::RTrim(const char& symbol) {
     }
   }
 
-  char* tempArray = new char[std::strlen(Data) - countOfTrim + 1];
-  std::copy(Data, Data + std::strlen(Data) - countOfTrim, tempArray);
-  tempArray[std::strlen(Data) - countOfTrim] = '\0';
+  char* tempArray = new char[SizeOfString - countOfTrim + 1];
+  std::copy(Data, Data + SizeOfString - countOfTrim, tempArray);
+  tempArray[SizeOfString - countOfTrim] = '\0';
   delete[] Data;
   Data = tempArray;
+  SizeOfString = std::strlen(tempArray);
 }
 /// Отрезание символов слева
 void String::LTrim(const char& symbol) {
   size_t countOfTrim = 0;
-  for (size_t i = 0; i < std::strlen(Data); ++i) {
+  for (size_t i = 0; i < SizeOfString; ++i) {
     if (Data[i] == symbol) {
       ++countOfTrim;
     } else {
@@ -155,17 +143,13 @@ void String::LTrim(const char& symbol) {
     }
   }
   char* tempArray = new char[(std::strlen(Data) - countOfTrim) + 1];
-  std::copy(Data + countOfTrim, Data + std::strlen(Data) + 1, tempArray);
+  std::copy(Data + countOfTrim, Data + SizeOfString + 1, tempArray);
   delete[] Data;
   Data = tempArray;
+  SizeOfString = std::strlen(tempArray);
 }
 
-void String::swap(String& oth) {
-  std::swap(Data, oth.Data);
-  //  char* temp = Data;
-  //  Data = oth.Data;
-  //  oth.Data = temp;
-}
+void String::swap(String& oth) { std::swap(Data, oth.Data); }
 /// Оператор +
 String operator+(const String& a, const String& b) {
   String sum(a);
@@ -175,16 +159,16 @@ String operator+(const String& a, const String& b) {
 /// Оператор *
 String operator*(const String& a, unsigned int b) {
   String multiplyingByTheNumber(a);
-  multiplyingByTheNumber *= (b - 1);
+  multiplyingByTheNumber *= b;
   return multiplyingByTheNumber;
 }
 /// Оператор !=
 bool operator!=(const String& a, const String& b) { return !(a == b); }
 /// Оператор &gt;
-bool operator>(const String& a, const String& b) { return !(a == b || a < b); }
+bool operator>(const String& a, const String& b) { return b < a; }
 /// Оператор вывода
 std::ostream& operator<<(std::ostream& out, const String& str) {
-  for (size_t i = 0; i < std::strlen(str.Data); ++i) {
+  for (size_t i = 0; i < str.SizeOfString; ++i) {
     out << str.Data[i];
   }
   return out;

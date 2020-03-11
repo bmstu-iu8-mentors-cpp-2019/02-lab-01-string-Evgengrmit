@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstring>
+#include <exception>
 #include <iostream>
 #include <utility>
 
@@ -116,6 +117,7 @@ class String {
 
  private:
   char* Data;
+  size_t SizeOfString{};
 };
 
 /// Оператор +
