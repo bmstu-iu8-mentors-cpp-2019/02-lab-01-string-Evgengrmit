@@ -15,7 +15,7 @@ String::String(const String& rhs)
 /// Пользовательский конструктор
 String::String(const char* data) {
   SizeOfString = std::strlen(data);
-  Data = new char[SizeOfString + 1];
+  Data = new char[SizeOfString ];
   std::copy(data, data + SizeOfString + 1, Data);
 }
 /// Оператор присваивания
@@ -28,14 +28,14 @@ String& String::operator=(const String& rhs) {
       delete[] Data;
     }
     SizeOfString = rhs.SizeOfString;
-    Data = new char[rhs.SizeOfString + 1];
+    Data = new char[rhs.SizeOfString ];
     std::copy(rhs.Data, rhs.Data + rhs.SizeOfString + 1, Data);
   }
   return *this;
 }
 /// Оператор +=
 String& String::operator+=(const String& rhs) {
-  char* tempArray = new char[SizeOfString + rhs.SizeOfString + 1];
+  char* tempArray = new char[SizeOfString + rhs.SizeOfString];
   std::copy(Data, Data + SizeOfString + 1, tempArray);
   std::copy(rhs.Data, rhs.Data + rhs.SizeOfString + 1,
             tempArray + std::strlen(tempArray));
@@ -46,7 +46,7 @@ String& String::operator+=(const String& rhs) {
 }
 /// Оператор *=
 String& String::operator*=(unsigned int m) {
-  char* tempArray = new char[SizeOfString * m + 1];
+  char* tempArray = new char[SizeOfString * m ];
   for (size_t i = 0, step = 0; i < m; ++i, step += std::strlen(Data)) {
     std::copy(Data, Data + std::strlen(Data), tempArray + step);
   }
